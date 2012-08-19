@@ -5,7 +5,7 @@
 "       HomePage : https://github.com/zhaocai/quickrun-runner-vimshell.vim
 "        Version : 0.1
 "   Date Created : Sun 19 Aug 2012 03:19:22 PM EDT
-"  Last Modified : Sun 19 Aug 2012 06:21:15 PM EDT
+"  Last Modified : Sun 19 Aug 2012 06:36:02 PM EDT
 "            Tag : [ vim, shell, runner ]
 "      Copyright : © 2012 by Zhao Cai,
 "                  Released under current GPL license.
@@ -30,7 +30,6 @@ function! s:runner.run(commands, input, session)
     endtry
 
     for cmd in a:commands
-        call Decho("cmd:" . string(cmd))
         if cmd =~# '^\s*:'
             " A vim command.
             try
@@ -47,7 +46,7 @@ function! s:runner.run(commands, input, session)
 endfunction
 
 function! s:execute(cmd)
-    execute "VimShellSendString " . cmd
+    execute "VimShellSendString " . a:cmd
 endfunction
 
 
