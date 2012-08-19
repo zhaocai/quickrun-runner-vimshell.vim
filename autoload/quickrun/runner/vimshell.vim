@@ -2,10 +2,10 @@
 "           Name : vimshell
 "       Synopsis : quickrun: runner/vimshell Runs by vimshell Popup windows
 "         Author : Zhao Cai <caizhaoff@gmail.com>
-"       HomePage : [TODO]( HomePage ) 
+"       HomePage : https://github.com/zhaocai/quickrun-runner-vimshell.vim
 "        Version : 0.1
 "   Date Created : Sun 19 Aug 2012 03:19:22 PM EDT
-"  Last Modified : Sun 19 Aug 2012 03:20:21 PM EDT
+"  Last Modified : Sun 19 Aug 2012 06:21:15 PM EDT
 "            Tag : [ vim, shell, runner ]
 "      Copyright : © 2012 by Zhao Cai,
 "                  Released under current GPL license.
@@ -15,37 +15,49 @@ set cpo&vim
 
 let s:runner = {}
 
+function! s:runner.init(session)
+    let a:session.config.outputter = 'null'
+endfunction
+
 function! s:runner.run(commands, input, session)
-  if a:cmd =~# '^\s*:'
-    " A vim command.
+    let ret = 0
     try
-      let result = quickrun#execute(a:cmd)
-    catch
-      return ['', 1]
+        VimShellPop
+    catch /.*/
+        let ret = 1
+        call g:quickrun#V.print_error("fail to activate vimshell:" . v:exception)
+        return ret
     endtry
-    return [result, 0]
-  endif
 
-  let code = 0
-  try
-    VimShellPop
-  catch /.*/
-    call g:quickrun#V.print_error("fail to activate vimshell:" . v:exception)
-    let code = 1
-    return code
-  endtry
+    for cmd in a:commands
+        call Decho("cmd:" . string(cmd))
+        if cmd =~# '^\s*:'
+            " A vim command.
+            try
+                execute cmd
+            catch
+                break
+            endtry
+            continue
+        endif
 
-  for cmd in a:commands
+        call s:execute(cmd)
+    endfor
+    return ret
+endfunction
+
+function! s:execute(cmd)
     execute "VimShellSendString " . cmd
-  endfor
-  return code
 endfunction
 
 
-
 function! quickrun#runner#vimshell#new()
-  return deepcopy(s:runner)
+    return deepcopy(s:runner)
 endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+" __MODELINE__  [[[1 ---------------------------------------------------------
+"/!
+" vim: set ft=vim et ts=4 sw=4 tw=78 fdm=marker fmr=[[[,]]] fdl=1 :
