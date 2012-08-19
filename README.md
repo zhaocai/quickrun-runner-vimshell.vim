@@ -1,9 +1,9 @@
 # QuickRun Runner for Vimshell
 
-QuickRun runner for vimshel.
+QuickRun runner for vimshell.
 
 - quickrun: https://github.com/thinca/vim-quickrun
-- unite-qf: https://github.com/Shougo/vimshell
+- vimshell: https://github.com/Shougo/vimshell
 
 ##Installation
 
@@ -11,7 +11,7 @@ QuickRun runner for vimshel.
 
 ##Usage
 
-specify `vimshel` as quickrun runner.
+specify `vimshell` as quickrun runner.
 
 Example:
 
