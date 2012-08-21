@@ -5,7 +5,7 @@
 "       HomePage : https://github.com/zhaocai/quickrun-runner-vimshell.vim
 "        Version : 0.1
 "   Date Created : Sun 19 Aug 2012 03:19:22 PM EDT
-"  Last Modified : Sun 19 Aug 2012 06:36:02 PM EDT
+"  Last Modified : Tue 21 Aug 2012 07:58:58 AM EDT
 "            Tag : [ vim, shell, runner ]
 "      Copyright : © 2012 by Zhao Cai,
 "                  Released under current GPL license.
@@ -13,16 +13,33 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:runner = {}
+let s:runner = {
+\   'config': {
+\     'split': 'pop',
+\   }
+\ }
 
-function! s:runner.init(session)
+let s:vimshell_open = {
+            \  'pop' : 'VimShellPop' ,
+            \  'win' : 'VimShell'    ,
+            \  'tab' : 'VimShellTab' ,
+        \}
+fun! s:map_vimshell_cmd(split)
+    if has_key(s:vimshell_open, a:split)
+        return s:vimshell_open[a:split]
+    else
+        call g:quickrun#V.print_error(a:split.":valid split option are [".join(keys(s:vimshell_open), ', ') . ']' )
+        return s:vimshell_open['pop']
+    endif
+endf
+fun! s:runner.init(session)
     let a:session.config.outputter = 'null'
-endfunction
+endf
 
-function! s:runner.run(commands, input, session)
+fun! s:runner.run(commands, input, session)
     let ret = 0
     try
-        VimShellPop
+        execute s:map_vimshell_cmd(self.config.split)
     catch /.*/
         let ret = 1
         call g:quickrun#V.print_error("fail to activate vimshell:" . v:exception)
@@ -43,16 +60,25 @@ function! s:runner.run(commands, input, session)
         call s:execute(cmd)
     endfor
     return ret
-endfunction
+endf
 
-function! s:execute(cmd)
-    execute "VimShellSendString " . a:cmd
-endfunction
+fun! s:runner.shellescape(str)
+  return '"' . escape(a:str, '\"') . '"'
+endf
+
+fun! s:execute(cmd)
+    try
+        execute "VimShellSendString " . a:cmd
+    catch /.*/
+        call g:quickrun#V.print_error("fail to send command to vimshell:" . v:exception)
+    endtry
+
+endf
 
 
-function! quickrun#runner#vimshell#new()
+fun! quickrun#runner#vimshell#new()
     return deepcopy(s:runner)
-endfunction
+endf
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
