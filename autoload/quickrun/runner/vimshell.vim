@@ -5,7 +5,7 @@
 "       HomePage : https://github.com/zhaocai/quickrun-runner-vimshell.vim
 "        Version : 0.1
 "   Date Created : Sun 19 Aug 2012 03:19:22 PM EDT
-"  Last Modified : Tue 21 Aug 2012 07:58:58 AM EDT
+"  Last Modified : Sat 08 Sep 2012 12:10:32 AM EDT
 "            Tag : [ vim, shell, runner ]
 "      Copyright : © 2012 by Zhao Cai,
 "                  Released under current GPL license.
@@ -37,6 +37,7 @@ fun! s:runner.init(session)
 endf
 
 fun! s:runner.run(commands, input, session)
+"    call Dfunc("vimshell_runner.run(" . string(a:) . ")")
     let ret = 0
     try
         execute s:map_vimshell_cmd(self.config.split)
@@ -46,19 +47,9 @@ fun! s:runner.run(commands, input, session)
         return ret
     endtry
 
-    for cmd in a:commands
-        if cmd =~# '^\s*:'
-            " A vim command.
-            try
-                execute cmd
-            catch
-                break
-            endtry
-            continue
-        endif
+    call s:execute(a:commands)
 
-        call s:execute(cmd)
-    endfor
+"    call Dret('vimshell_runner.run')
     return ret
 endf
 
@@ -68,7 +59,7 @@ endf
 
 fun! s:execute(cmd)
     try
-        execute "VimShellSendString " . a:cmd
+        call vimshell#interactive#send_string(a:cmd)
     catch /.*/
         call g:quickrun#V.print_error("fail to send command to vimshell:" . v:exception)
     endtry
