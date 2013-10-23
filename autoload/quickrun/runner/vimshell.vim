@@ -5,7 +5,7 @@
 "       HomePage : https://github.com/zhaocai/quickrun-runner-vimshell.vim
 "        Version : 0.1
 "   Date Created : Sun 19 Aug 2012 03:19:22 PM EDT
-"  Last Modified : Sat 08 Sep 2012 12:10:32 AM EDT
+"  Last Modified : Mon 10 Sep 2012 01:19:23 PM EDT
 "            Tag : [ vim, shell, runner ]
 "      Copyright : © 2012 by Zhao Cai,
 "                  Released under current GPL license.
@@ -24,23 +24,33 @@ let s:vimshell_open = {
             \  'win' : 'VimShell'    ,
             \  'tab' : 'VimShellTab' ,
         \}
-fun! s:map_vimshell_cmd(split)
+function! s:map_vimshell_cmd(split)
     if has_key(s:vimshell_open, a:split)
         return s:vimshell_open[a:split]
     else
         call g:quickrun#V.print_error(a:split.":valid split option are [".join(keys(s:vimshell_open), ', ') . ']' )
         return s:vimshell_open['pop']
     endif
-endf
-fun! s:runner.init(session)
+endfunction
+function! s:runner.init(session)
     let a:session.config.outputter = 'null'
-endf
+endfunction
 
-fun! s:runner.run(commands, input, session)
-"    call Dfunc("vimshell_runner.run(" . string(a:) . ")")
+function! s:runner.run(commands, input, session)
+    "    call Dfunc("vimshell_runner.run(" . string(a:) . ")")
     let ret = 0
     try
-        execute s:map_vimshell_cmd(self.config.split)
+        let is_vimshell_visible = 0
+        if exists('t:vimshell')
+            let last_interactive_bufnr = t:vimshell.last_interactive_bufnr
+            let winnr = bufwinnr(last_interactive_bufnr)
+            if winnr > 0
+                let is_vimshell_visible = 1
+            endif
+        endif
+        if is_vimshell_visible == 0
+            execute s:map_vimshell_cmd(self.config.split)
+        endif
     catch /.*/
         let ret = 1
         call g:quickrun#V.print_error("fail to activate vimshell:" . v:exception)
@@ -49,27 +59,27 @@ fun! s:runner.run(commands, input, session)
 
     call s:execute(a:commands)
 
-"    call Dret('vimshell_runner.run')
+    "    call Dret('vimshell_runner.run')
     return ret
-endf
+endfunction
 
-fun! s:runner.shellescape(str)
+function! s:runner.shellescape(str)
   return '"' . escape(a:str, '\"') . '"'
-endf
+endfunction
 
-fun! s:execute(cmd)
+function! s:execute(cmd)
     try
-        call vimshell#interactive#send_string(a:cmd)
+        call vimshell#interactive#send(a:cmd)
     catch /.*/
         call g:quickrun#V.print_error("fail to send command to vimshell:" . v:exception)
     endtry
 
-endf
+endfunction
 
 
-fun! quickrun#runner#vimshell#new()
+function! quickrun#runner#vimshell#new()
     return deepcopy(s:runner)
-endf
+endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
