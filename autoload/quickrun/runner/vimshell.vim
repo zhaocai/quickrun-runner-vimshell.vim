@@ -69,7 +69,7 @@ endfunction
 
 function! s:execute(cmd)
     try
-        call vimshell#interactive#send_string(a:cmd)
+        call vimshell#interactive#send(a:cmd)
     catch /.*/
         call g:quickrun#V.print_error("fail to send command to vimshell:" . v:exception)
     endtry
